@@ -30,6 +30,13 @@
 
                 <button type="submit" class="btn btn-success">Update Task</button>
                 <a href="{{ route('tasks.index') }}" class="btn btn-secondary">Cancel</a>
+    <a href="{{ route('admin.tasks.disable', $task->id) }}" 
+   class="btn btn-sm btn-warning" 
+   onclick="return confirm('Are you sure you want to disable this task?')">
+    <i class="fas fa-ban"></i> Disable
+</a>
+
+
             </form>
         </div>
     </div>

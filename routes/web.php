@@ -1,36 +1,121 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TaskController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AdminController;   
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\GroupController;
 
-// Public homepage
+/*
+|--------------------------------------------------------------------------
+| Public Homepage
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
-    return view('welcome');
-});
-
-// Dashboard (requires auth and email verification)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');Route::get('/', function () {
     return Auth::check()
         ? redirect()->route('dashboard')
         : view('welcome');
 });
- 
 
-// Routes that require authentication
+/*
+|--------------------------------------------------------------------------
+| Authenticated Dashboard
+|--------------------------------------------------------------------------
+*/
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated User Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth'])->group(function () {
-
-    // Task resource routes (index, create, store, show, edit, update, destroy)
+    // Tasks
     Route::resource('tasks', TaskController::class);
 
-    // Profile routes
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Auth scaffolding routes (login, register, password, etc.)
-require __DIR__.'/auth.php';
+
+
+
+Route::controller(AdminController::class)->prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/tasks', 'index')->name('tasks.index');
+    Route::get('/tasks/{task}/edit', 'edit')->name('tasks.edit');
+    Route::put('/tasks/{task}', 'update')->name('tasks.update');
+    Route::post('/tasks/{task}/disable', 'disable')->name('tasks.disable');
+   Route::get('/tasks/{task}/status', [AdminController::class, 'showAllTaskStatuses'])->name('tasks.status');
+Route::post('/tasks/{task}/status', [AdminController::class, 'updateStatus'])->name('tasks.status.update');
+    Route::get('tasks/{task}/disable', [AdminController::class, 'showDisableForm'])->name('tasks.disable.form');
+    Route::delete('/task/{task}/delete', [AdminController::class, 'destroy'])->name('tasks.destroy');
+
+});
+
+Route::get('/admin', [AdminController::class, 'dashboard'])->middleware('auth')->name('admin.home');
+
+
+Route::get('/notifications/mark-all-read', function () {
+    Auth::user()->unreadNotifications->markAsRead();
+    return back();
+})->name('notifications.markAllAsRead');
+
+/*
+|--------------------------------------------------------------------------
+| User Management Routes
+|--------------------------------------------------------------------------
+Route::prefix('users')->name('users.')->group(function () {
+    Route::get('/', [UserController::class, 'index'])->name('index');
+    Route::get('/create', [UserController::class, 'create'])->name('create');
+    Route::post('/', [UserController::class, 'store'])->name('store');
+    Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+    Route::put('/{user}', [UserController::class, 'update'])->name('update');
+    Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('togglestatus');
+});*/
+
+
+/*
+|--------------------------------------------------------------------------
+| Status Management Routes (Settings Section)
+|--------------------------------------------------------------------------
+*/
+// Route::prefix('settings1')->name('status.')->group(function () {
+//     Route::get('/status', [StatusController::class, 'index'])->name('index');
+//     Route::get('/status/create', [StatusController::class, 'create'])->name('create');
+//     Route::post('/status', [StatusController::class, 'store'])->name('store');
+//     Route::get('/status/{status}', [StatusController::class, 'show'])->name('show');
+//     Route::get('/status/{status}/edit', [StatusController::class, 'edit'])->name('edit');
+//     Route::match(['put', 'patch'], '/status/{status}', [StatusController::class, 'update'])->name('update');
+//     Route::delete('/status/{status}', [StatusController::class, 'destroy'])->name('destroy');
+// });
+
+/*
+|--------------------------------------------------------------------------
+| Group Routes
+|--------------------------------------------------------------------------
+*/
+
+
+/*
+|--------------------------------------------------------------------------
+| Auth Scaffolding (Laravel Breeze or Jetstream)
+|--------------------------------------------------------------------------
+*/
+require __DIR__ . '/auth.php';
+
+/*
+|--------------------------------------------------------------------------
+| Fallback Home Route
+|--------------------------------------------------------------------------
+*/
+Route::get('/home', [HomeController::class, 'index'])->name('home');

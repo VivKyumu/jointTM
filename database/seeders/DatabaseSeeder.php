@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Database\Seeders\TaskSeeder;
+use App\Models\Task;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Task::factory()->count(30)->create(); // Or however many you need
         // Create 3 users
         User::factory(3)->create();
 
@@ -23,6 +25,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Call the task seeder
-        $this->call(TaskSeeder::class);
+        $this->call([
+            TaskSeeder::class,
+            RoleSeeder::class, // Ensure RoleSeeder is called to create roles
+            StatusSeeder::class,// Add other seeders here
+        ]);
     }
 }
