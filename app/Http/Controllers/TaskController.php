@@ -12,36 +12,11 @@ class TaskController extends Controller
 {
    public function dashboard() 
 {
-    /** @var \App\Models\User $user */
+    
     $user = Auth::user();
+    $taskCount = Task::where('user_id', $user->id)->count();
 
-    $taskCount = $user->tasks()->count();
-
-    $completedTasks = Task::where('status', 'completed')->count();
-    $pendingTasks = Task::where('status', 'pending')->count();
-
-    $statusDistribution = [
-        Task::where('status', 'pending')->count(),
-        Task::where('status', 'in progress')->count(),
-        $completedTasks
-    ];
-
-    $taskDates = Task::selectRaw('DATE(created_at) as date')
-                     ->where('status', 'completed')
-                     ->orderBy('date')
-                     ->pluck('date')
-                     ->toArray();
-
-    $taskCounts = array_count_values($taskDates);
-
-    return view('dashboard', [
-        'taskCount' => $taskCount,
-        'completedTasks' => $completedTasks,
-        'pendingTasks' => $pendingTasks,
-        'statusDistribution' => $statusDistribution,
-        'taskDates' => array_keys($taskCounts),
-        'taskCounts' => array_values($taskCounts),
-    ]);
+    return view('dashboard', compact('taskCount'));
 }
 
     /**
@@ -51,17 +26,12 @@ class TaskController extends Controller
 {
     $user = $request->user();
 
-    if ($user->isAdmin()) {
-        // Admin sees all tasks + user info
-        $tasks = Task::with('user')->latest()->paginate(10);
-    } else {
-        // Normal users see their own tasks
-        $tasks = $user->tasks()->with('user')->latest()->paginate(10);
-    }
+    // Everyone (admin or not) sees only their own tasks
+    $tasks = $user->tasks()->with('user')->latest()->paginate(10);
 
     return view('tasks.index', compact('tasks'));
 }
- 
+
     /**
      * Show the task creation form.
      */
@@ -109,7 +79,8 @@ public function store(Request $request)
      */
     public function edit(Task $task)
 {
-    return view('tasks.edit', compact('task'));
+    $users = User::all(); // Fetch all users
+    return view('tasks.edit', compact('task', 'users'));
 }
 
 

@@ -84,7 +84,7 @@
 
     <!-- Quick Actions -->
     <div class="d-flex gap-2">
-        <a href="{{ route('tasks.index') }}" class="btn btn-outline-primary">View All Tasks</a>
+        <a href="{{ route('admin.tasks.index') }}" class="btn btn-outline-primary">View All Tasks</a>
     </div>
 
     <!-- Chart Section -->

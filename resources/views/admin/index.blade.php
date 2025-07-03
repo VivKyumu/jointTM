@@ -22,8 +22,7 @@
     <div class="alert alert-success alert-dismissible fade show" role="alert" id="success-alert">
         <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
     </div>
-@endif
-
+    @endif
 
     <table class="table table-striped table-hover rounded shadow-sm bg-white align-middle">
         <thead class="thead-light">
@@ -46,8 +45,7 @@
                     <td>{{ $task->user->name ?? 'N/A' }}</td>
 
                     <td>
-                        <span class="badge 
-                            {{ $task->user->isAdmin() ? 'bg-primary' : 'bg-secondary' }}">
+                        <span class="badge {{ $task->user->isAdmin() ? 'bg-primary' : 'bg-secondary' }}">
                             <i class="fas {{ $task->user->isAdmin() ? 'fa-shield-alt' : 'fa-user' }} me-1"></i>
                             {{ $task->user->isAdmin() ? 'Admin' : 'User' }}
                         </span>
@@ -59,14 +57,6 @@
                             <a href="{{ route('admin.tasks.edit', $task) }}" class="btn btn-outline-info" data-toggle="tooltip" title="Edit Task">
                                 <i class="fas fa-edit"></i>
                             </a>
-
-                            {{-- 🚫 Disable (optional) --}}
-                            <form action="{{ route('admin.tasks.disable', $task->id) }}" method="POST" class="d-inline-block">
-                                @csrf
-                                <button type="submit" class="btn btn-outline-secondary" data-toggle="tooltip" title="Disable Task">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </form>
 
                             {{-- 🗑️ Delete --}}
                             <form action="{{ route('admin.tasks.destroy', $task->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this task?');">
@@ -97,16 +87,10 @@
 @push('scripts')
 <script>
     $(function () {
-        // Tooltip
         $('[data-toggle="tooltip"]').tooltip();
-
-        // Auto-dismiss success alert
-        setTimeout(function () {
-            $("#success-alert").fadeOut("slow");
-        }, 3000); // 3 seconds
+        setTimeout(() => $("#success-alert").fadeOut("slow"), 3000);
     });
 </script>
-
 @endpush
 
 @push('styles')
@@ -121,11 +105,6 @@
 
     .btn-outline-info:hover {
         background-color: #17a2b8;
-        color: white;
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: #6c757d;
         color: white;
     }
 
