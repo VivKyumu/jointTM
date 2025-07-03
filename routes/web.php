@@ -30,6 +30,9 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/dashboard', [TaskController::class, 'dashboard'])->name('dashboard');
+
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated User Routes
@@ -55,11 +58,13 @@ Route::controller(AdminController::class)->prefix('admin')->name('admin.')->grou
     Route::get('/tasks/{task}/edit', 'edit')->name('tasks.edit');
     Route::put('/tasks/{task}', 'update')->name('tasks.update');
     Route::post('/tasks/{task}/disable', 'disable')->name('tasks.disable');
-   Route::get('/tasks/{task}/status', [AdminController::class, 'showAllTaskStatuses'])->name('tasks.status');
-Route::post('/tasks/{task}/status', [AdminController::class, 'updateStatus'])->name('tasks.status.update');
-    Route::get('tasks/{task}/disable', [AdminController::class, 'showDisableForm'])->name('tasks.disable.form');
+    Route::get('/tasks/{task}/status', [AdminController::class, 'showAllTaskStatuses'])->name('tasks.status');
+    Route::post('/tasks/{task}/status', [AdminController::class, 'updateStatus'])->name('tasks.status.update');
+    Route::post('/tasks/{task}/disable/confirm', [AdminController::class, 'showDisableForm'])->name('tasks.disable.form');
+     
     Route::delete('/task/{task}/delete', [AdminController::class, 'destroy'])->name('tasks.destroy');
-
+    
+   
 });
 
 Route::get('/admin', [AdminController::class, 'dashboard'])->middleware('auth')->name('admin.home');
@@ -70,18 +75,10 @@ Route::get('/notifications/mark-all-read', function () {
     return back();
 })->name('notifications.markAllAsRead');
 
-/*
-|--------------------------------------------------------------------------
-| User Management Routes
-|--------------------------------------------------------------------------
-Route::prefix('users')->name('users.')->group(function () {
-    Route::get('/', [UserController::class, 'index'])->name('index');
-    Route::get('/create', [UserController::class, 'create'])->name('create');
-    Route::post('/', [UserController::class, 'store'])->name('store');
-    Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
-    Route::put('/{user}', [UserController::class, 'update'])->name('update');
-    Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('togglestatus');
-});*/
+
+
+
+
 
 
 /*
