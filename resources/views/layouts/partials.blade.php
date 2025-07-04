@@ -388,7 +388,7 @@
 
     {{-- FOOTER --}}
     <footer class="main-footer text-sm text-center">
-        <strong>&copy; {{ date('Y') }} Task Manager</strong> · Built with 💼 and Laravel
+        <strong>&copy; {{ date('Y') }} Task Manager</strong> · ALOOO ALOOO KYUMU
     </footer>
 </div>
 

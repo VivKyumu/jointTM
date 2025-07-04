@@ -24,7 +24,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
         Route::post('/settings', 'updateSettings')->name('settings.update');
     });
 
-    // User Management - Using controller grouping
+    // User Management
     Route::controller(UserController::class)->prefix('users')->name('users.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
@@ -37,27 +37,24 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
         // Role and group management routes
         Route::put('/{user}/update-role', 'updateRole')->name('updateRole');
         Route::put('/{user}/update-groups', 'updateGroups')->name('updateGroups');
-        Route::put('/{user}/sync-groups', 'syncGroups')->name('syncGroups'); // Added for many-to-many
+        Route::put('/{user}/sync-groups', 'syncGroups')->name('syncGroups');
     });
 
-    // User Groups - Using controller grouping
-    Route::controller(GroupController::class)
-        ->prefix('groups')
-        ->name('groups.')
-        ->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{group}', 'show')->name('show');
-            Route::get('/{group}/edit', 'edit')->name('edit');
-            Route::put('/{group}', 'update')->name('update');
-            Route::delete('/{group}', 'destroy')->name('destroy');
-            
-            // User-group management routes
-            Route::post('/{group}/add-user', 'addUser')->name('addUser');
-            Route::delete('/{group}/remove-user/{user}', 'removeUser')->name('removeUser');
-            Route::put('/{group}/sync-users', 'syncUsers')->name('syncUsers'); // Added for many-to-many
-        });
+    // User Groups
+    Route::controller(GroupController::class)->prefix('groups')->name('groups.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{group}', 'show')->name('show');
+        Route::get('/{group}/edit', 'edit')->name('edit');
+        Route::put('/{group}', 'update')->name('update');
+        Route::delete('/{group}', 'destroy')->name('destroy');
+        
+        // User-group management routes
+        Route::post('/{group}/add-user', 'addUser ')->name('addUser ');
+        Route::delete('/{group}/remove-user/{user}', 'removeUser ')->name('removeUser ');
+        Route::put('/{group}/sync-users', 'syncUsers')->name('syncUsers');
+    });
 
     // Status Management
     Route::controller(StatusController::class)->prefix('statuses')->name('statuses.')->group(function () {
@@ -80,6 +77,12 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
         Route::put('/{complexity}', 'update')->name('update');
         Route::delete('/{complexity}', 'destroy')->name('destroy');
     });
+
+    // Task management routes for admin
+    Route::controller(TaskController::class)->prefix('tasks')->name('tasks.')->group(function () {
+        Route::put('/{task}/update-status', 'updateStatus')->name('update-status');
+        Route::put('/{task}/update-complexity', 'updateComplexity')->name('update-complexity');
+    });
 });
 
 // Dashboard (requires auth only)
@@ -90,13 +93,13 @@ Route::get('/dashboard', function () {
 // Authenticated user routes
 Route::middleware(['auth'])->group(function () {
     // Task resource routes
-    Route::resource('tasks', TaskController::class);
+    Route::resource('tasks', TaskController::class)->except(['updateStatus', 'updateComplexity']);
     
-    // Task status and complexity updates
+    // Task status and complexity updates for regular users
     Route::put('/tasks/{task}/update-status', [TaskController::class, 'updateStatus'])
-        ->name('tasks.updateStatus');
+        ->name('tasks.update-status'); // Ensure this matches the controller method
     Route::put('/tasks/{task}/update-complexity', [TaskController::class, 'updateComplexity'])
-        ->name('tasks.updateComplexity');
+        ->name('tasks.update-complexity'); // Ensure this matches the controller method
 
     // Profile routes
     Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {

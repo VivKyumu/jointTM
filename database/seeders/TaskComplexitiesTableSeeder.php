@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use App\Models\TaskComplexity;
 
 class TaskComplexitiesTableSeeder extends Seeder
@@ -42,7 +43,13 @@ class TaskComplexitiesTableSeeder extends Seeder
         ];
         
         foreach ($complexities as $complexity) {
-            TaskComplexity::create($complexity);
+            DB::table('task_complexities')->updateOrInsert(
+                ['level' => $complexity['level']], // The condition to check
+                $complexity + [                     // Data to insert/update
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
         }
     }
 }
