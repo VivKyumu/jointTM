@@ -217,6 +217,7 @@
         margin: 2px;
         padding: 0 6px;
     }
+
 </style>
 
 <script>

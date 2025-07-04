@@ -359,7 +359,7 @@
                             <button type="submit" class="nav-link btn btn-link text-left w-100">
                                 <i class="nav-icon fas fa-sign-out-alt text-danger"></i>
                                 <p>Logout</p>
-                            </button>
+                            </button> 
                         </form>
                     </li>
                 </ul>
