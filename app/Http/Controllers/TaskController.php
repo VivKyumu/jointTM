@@ -2,60 +2,65 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Task;
-use Illuminate\Support\Facades\Auth;
-use App\Notifications\TaskAssigned;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use App\Notifications\TaskAssigned;
 
 class TaskController extends Controller
 {
-   public function dashboard() 
-{
-    
-    $user = Auth::user();
-    $taskCount = Task::where('user_id', $user->id)->count();
-
-    return view('dashboard', compact('taskCount'));
-}
-
-    /**
-     * Display a list of tasks for the authenticated user.
-     */
-    public function index(Request $request)
-{
-    $user = $request->user();
-
-    // Everyone (admin or not) sees only their own tasks
-    $tasks = $user->tasks()->with('user')->latest()->paginate(10);
-
-    return view('tasks.index', compact('tasks'));
-}
-
-    /**
-     * Show the task creation form.
-     */
-    public function create()
+    public function __construct()
     {
-        return view('tasks.create');
+        $this->middleware('auth');
     }
 
+    // 🧭 Dashboard
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $taskCount = Task::where('user_id', $user->id)->count();
 
-public function store(Request $request)
+        return view('dashboard', compact('taskCount'));
+    }
+
+    // 📋 List tasks for authenticated user
+    public function index(Request $request)
+    {
+        $user = $request->user();
+        $tasks = $user->tasks()->with('user')->latest()->paginate(10);
+
+        return view('tasks.index', compact('tasks'));
+    }
+
+    // ===============================
+    // 📌 Version A: store() – with notifications and AJAX
+   public function store(Request $request)
 {
     $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
+        'user_id' => 'nullable|exists:users,id', // Optional
     ]);
+
+    $userId = $request->user_id ?? Auth::id(); // Assign to another or self
 
     $task = Task::create([
         'title' => $request->title,
         'description' => $request->description,
         'status' => 'pending',
-        'user_id' => Auth::id(),
+        'user_id' => $userId,
     ]);
 
-    // If the request is AJAX (like from the modal), return JSON
+    // Notify only if assigned to someone else
+    if ($request->user_id) {
+        $user = User::find($userId);
+        if ($user) {
+            $user->notify(new TaskAssigned($task));
+        }
+    }
+
     if ($request->ajax()) {
         return response()->json([
             'message' => 'Task created successfully!',
@@ -63,82 +68,111 @@ public function store(Request $request)
         ]);
     }
 
-    // Otherwise, continue with normal redirect
     return redirect()->route('tasks.index')->with('success', 'Task created successfully!');
-    // 3. Notify the assigned user
-
-    $user = User::find($validated['assigned_to']);
-    $user->notify(new TaskAssigned($task));
-
-    // 4. Redirect back with success message
-    return redirect()->route('tasks.index')->with('success', 'Task created and user notified!');
 }
 
-    /**
-     * Show the form for editing a specific task.
-     */
-    public function edit(Task $task)
+
+    // ===============================
+    // 📌 Version A: edit() – with user list
+   public function edit(Task $task)
 {
-    $users = User::all(); // Fetch all users
+    $this->authorize('update', $task); // For security
+
+    $users = User::all(); // Needed for reassign dropdown
     return view('tasks.edit', compact('task', 'users'));
 }
 
 
-    /**
-     * Update the specified task in storage.
-     */
+    // ===============================
+    // 📌 Version A: update() – no auth
     public function update(Request $request, Task $task)
 {
+    $this->authorize('update', $task);
+
     $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
-        'status' => 'required|string',
+        'status' => ['required', Rule::in(['pending', 'in progress', 'on hold', 'completed'])],
+        'user_id' => 'nullable|exists:users,id',
     ]);
 
-    $task->update($request->only('title', 'description', 'status'));
+    $task->update([
+        'title' => $request->title,
+        'description' => $request->description,
+        'status' => $request->status,
+        'user_id' => $request->user_id ?? $task->user_id,
+    ]);
 
     return redirect()->route('tasks.index')->with('success', 'Task updated successfully.');
 }
 
 
+    // 👁️ Show a task
     public function show(Task $task)
-{
-    return view('tasks.show', compact('task'));
-}
-public function destroy(Task $task)
-{
-    $task->delete();
-
-    return redirect()->route('tasks.index')->with('success', 'Task deleted.');
-}
-
-
-
-public function assignTask(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string',
-        'description' => 'required|string',
-        'user_id' => 'required|exists:users,id',
-    ]);
-
-    $task = Task::create([
-        'title' => $request->title,
-        'description' => $request->description,
-        'status' => 'pending',
-        'user_id' => $request->user_id,
-    ]);
-
-    $user = User::find($request->user_id);
-    $user->notify(new TaskAssigned($task));
-
-    return back()->with('success', 'Task assigned and user notified!');
-}
-        public function via($notifiable)
     {
-      return ['mail', 'database'];
+        return view('tasks.show', compact('task'));
     }
 
-    
+    // ❌ Delete a task
+    public function destroy(Task $task)
+    {
+        $task->delete();
+        return redirect()->route('tasks.index')->with('success', 'Task deleted.');
+    }
 
+    // 📤 Assign task to another user
+    public function assignTask(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $task = Task::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'status' => 'pending',
+            'user_id' => $request->user_id,
+        ]);
+
+        $user = User::find($request->user_id);
+        $user->notify(new TaskAssigned($task));
+
+        return back()->with('success', 'Task assigned and user notified!');
+    }
+
+    // 🔄 Update status (AJAX)
+    public function updateStatus(Request $request, Task $task)
+    {
+        $validStatuses = ['pending', 'in progress', 'on hold', 'completed'];
+
+        $request->validate([
+            'status' => ['required', Rule::in($validStatuses)],
+        ]);
+
+        $task->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully',
+        ]);
+    }
+
+    // 🔧 Update complexity
+    public function updateComplexity(Request $request, Task $task)
+    {
+        $validComplexities = [1, 2, 3, 4, 5];
+
+        $request->validate([
+            'complexity_id' => ['required', Rule::in($validComplexities)],
+        ]);
+
+        $task->update(['complexity_id' => $request->complexity_id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Complexity updated successfully',
+        ]);
+    }
 }

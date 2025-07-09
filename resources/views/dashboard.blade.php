@@ -1,3 +1,4 @@
+
 @extends('layouts.partials')
 
 @section('title', 'Dashboard')

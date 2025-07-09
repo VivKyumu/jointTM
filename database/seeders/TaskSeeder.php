@@ -10,15 +10,13 @@ class TaskSeeder extends Seeder
 {
     public function run(): void
     {
-        // Truncate not needed after migrate:fresh
-
-        // Create 30 users
+        // Create 10 users
         $users = User::factory(10)->create();
 
-     foreach ($users as $user) {
-    \App\Models\Task::factory(rand(2, 5))->create([
-        'user_id' => $user->id,
-    ]);
+        foreach ($users as $user) {
+            Task::factory(rand(2, 5))->create([
+                'user_id' => $user->id,
+            ]);
         }
     }
 }

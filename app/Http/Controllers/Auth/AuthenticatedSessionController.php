@@ -8,7 +8,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+<<<<<<< HEAD
 use App\Models\User;
+=======
+>>>>>>> origin/main
 
 class AuthenticatedSessionController extends Controller
 {
@@ -24,6 +27,7 @@ class AuthenticatedSessionController extends Controller
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
+<<<<<<< HEAD
 { // 1. Attempt authentication
     $request->authenticate();
 
@@ -37,11 +41,23 @@ class AuthenticatedSessionController extends Controller
     // 4. Redirect based on role
     return redirect()->intended($user && $user->is_admin ? '/admin' : '/dashboard');
 
+=======
+    {
+        $request->authenticate();
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
+>>>>>>> origin/main
 
     /**
      * Destroy an authenticated session.
      */
+<<<<<<< HEAD
 }
+=======
+>>>>>>> origin/main
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();

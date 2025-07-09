@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use Database\Seeders\TaskSeeder;
 use App\Models\Task;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,9 +14,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Task::factory()->count(30)->create(); // Or however many you need
-        // Create 3 users
+        // Create 3 regular users
         User::factory(3)->create();
+
+        // Safely create or update admin user
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'is_admin' => true
+            ]
+        );
 
         // Create a specific user
         User::factory()->create([
@@ -24,11 +33,19 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // Call the task seeder
+        // Create 3 regular users if they don't exist (excluding admin and test user)
+        if (User::count() <= 2) { // Adjusted condition to allow test + admin
+            User::factory(3)->create();
+        }
+
+        // Seed default application data
         $this->call([
+            RoleSeeder::class,
+            StatusSeeder::class,
+            StatusesTableSeeder::class,
+            GroupSeeder::class,
+            TaskComplexitiesTableSeeder::class,
             TaskSeeder::class,
-            RoleSeeder::class, // Ensure RoleSeeder is called to create roles
-            StatusSeeder::class,// Add other seeders here
         ]);
     }
 }

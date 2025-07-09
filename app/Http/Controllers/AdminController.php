@@ -2,140 +2,97 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Task;
 use App\Models\User;
+use App\Models\Group;
+use App\Models\Status;
+use App\Models\Task;
+use App\Models\TaskComplexity;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    // 🧭 Admin Dashboard
     public function dashboard()
     {
-        $totalTasks = Task::count();
-        $completedTasks = Task::where('status', 'completed')->count();
-        $pendingTasks = Task::where('status', 'pending')->count();
-        $users = User::withCount('tasks')->paginate(10);
-
-        $taskData = Task::selectRaw('DATE(completed_at) as date, COUNT(*) as count')
-            ->whereNotNull('completed_at')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-
-        $taskDates = $taskData->pluck('date')->toArray();
-        $taskCounts = $taskData->pluck('count')->toArray();
-
-        $statusDistribution = [
-            Task::where('status', 'pending')->count(),
-            Task::where('status', 'in_progress')->count(),
-            Task::where('status', 'completed')->count(),
+        $stats = [
+            'users_count' => User::count(),
+            'groups_count' => Group::withCount('users')->get()->sum('users_count'),
+            'tasks_count' => Task::count(),
+            'statuses_count' => Status::count(),
+            'complexities_count' => TaskComplexity::count(),
         ];
 
+        // Get recent users with their tasks count and groups
+        $recentUsers = User::with(['groups', 'tasks'])
+            ->withCount('tasks')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        // Get recent tasks with all relationships
+        $recentTasks = Task::with(['user.groups', 'status', 'complexity'])
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        // Get paginated tasks with all relationships (5 per page)
+        $tasks = Task::with(['user.groups', 'status', 'complexity'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
+
+        // Get all statuses, complexities, and groups for dropdowns
+        $statuses = Status::all();
+        $complexities = TaskComplexity::all();
+        $groups = Group::withCount('users')->get();
+
         return view('admin.dashboard', compact(
-            'totalTasks',
-            'completedTasks',
-            'pendingTasks',
-            'users',
-            'taskDates',
-            'taskCounts',
-            'statusDistribution'
+            'stats',
+            'recentUsers',
+            'recentTasks',
+            'tasks',
+            'statuses',
+            'complexities',
+            'groups'
         ));
     }
 
-    // 📋 List all tasks
-    public function index(Request $request)
-    {
-        $query = Task::with('user')->latest();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        $tasks = $query->paginate(10);
-        return view('admin.index', compact('tasks'));
-    }
-
-    // ✏️ Show edit form for a task
-    public function edit(Task $task)
-    {
-        $users = User::all();
-        return view('admin.edit', compact('task', 'users'));
-    }
-
-    // 💾 Update a task
-    public function update(Request $request, Task $task)
+    /**
+     * Handle group updates for users
+     */
+    public function updateUserGroups(Request $request, User $user)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'status' => 'required|in:pending,completed,disabled',
+            'group_ids' => 'nullable|array',
+            'group_ids.*' => 'exists:groups,id'
         ]);
 
-        $task->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => $request->status,
+        $user->groups()->sync($request->input('group_ids', []));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User groups updated successfully'
+        ]);
+    }
+
+    /**
+     * Display system information and settings.
+     */
+    public function settings()
+    {
+        return view('admin.settings');
+    }
+
+    /**
+     * Update system settings.
+     */
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'site_name' => 'required|string|max:255',
+            'items_per_page' => 'required|integer|min:5|max:100',
         ]);
 
-        return redirect()->route('admin.tasks.index')->with('success', 'Task updated successfully.');
-    }
-
-    // 🚫 Disable a user's account via a task
-    public function disable(Task $task)
-    {
-        $user = $task->user;
-
-        if ($user && $user->status !== 'inactive') {
-            $user->status = 'inactive';
-            $user->save();
-
-            return redirect()->route('admin.tasks.index')->with('success', 'User has been set to inactive.');
-        }
-
-        return redirect()->route('admin.tasks.index')->with('info', 'User is already inactive.');
-    }
-
-    // 📄 Show status view for a specific task
-    public function status(Task $task)
-    {
-        return view('admin.status', compact('task'));
-    }
-
-    // 🔄 Update task status
-    public function updateStatus(Request $request, Task $task)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,in progress,on hold,completed',
-        ]);
-
-        $task->update(['status' => $request->status]);
-
-        return redirect()
-            ->route('admin.tasks.status', $task->id)
-            ->with('success', 'Task status updated.');
-    }
-
-    // 📋 Show all task statuses
-    public function showAllTaskStatuses()
-    {
-        $tasks = Task::with('user')->latest()->paginate(10);
-        return view('admin.status', compact('tasks'));
-    }
-
-    // 👁️ Show disable form before disabling
-    public function showDisableForm(Task $task)
-    {
-        return view('admin.disable', compact('task'));
-    }
-
-    // 🗑️ Delete a task
-    public function destroy(Task $task)
-    {
-        $task->delete();
-        return redirect()->route('admin.tasks.index')->with('success', 'Task deleted successfully.');
+        return redirect()->route('admin.settings')
+                         ->with('success', 'Settings updated successfully');
     }
 }
+

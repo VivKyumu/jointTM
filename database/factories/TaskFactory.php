@@ -83,7 +83,7 @@ class TaskFactory extends Factory
                 'Make sure tests pass before merging.'
             ]),
             'status' => $status,
-            'completed_at' => $status === 'completed' ? now()->subDays(rand(0, 10)) : null,
+            'completed_at' => $status === 'completed' ? now()->subDays(rand(0, 10)) : null
         ];
     }
 }
