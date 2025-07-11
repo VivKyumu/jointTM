@@ -7,7 +7,7 @@
                 <h1>Create New Group</h1>
             </div>
             <div class="col-md-6 text-right">
-                <a href="{{ route('admin.groups.index') }}" class="btn btn-default">
+                <a href="{{ route('.groups.index') }}" class="btn btn-default">
                     <i class="fa fa-arrow-left"></i> Back to List
                 </a>
             </div>
@@ -18,7 +18,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Group Details</h3>
             </div>
-            <form action="{{ route('admin.groups.store') }}" method="POST">
+            <form action="{{ route('groups.store') }}" method="POST">
                 @csrf
                 <div class="box-body">
                     <div class="form-group @error('name') has-error @enderror">

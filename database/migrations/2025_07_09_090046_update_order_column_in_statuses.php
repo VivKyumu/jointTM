@@ -10,19 +10,20 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::table('tasks', function (Blueprint $table) {
-            $table->string('status')->default('pending')->after('description');
-        });
-    }
+{
+    Schema::table('statuses', function (Blueprint $table) {
+        $table->integer('order')->default(0)->change(); // Make it optional
+    });
+}
+
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::table('tasks', function (Blueprint $table) {
-            $table->dropColumn('status');
+        Schema::table('statuses', function (Blueprint $table) {
+            //
         });
     }
 };

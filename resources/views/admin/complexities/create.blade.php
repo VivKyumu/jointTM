@@ -11,7 +11,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Complexity Details</h3>
             </div>
-            <form action="{{ route('admin.complexities.store') }}" method="POST">
+            <form action="{{ route('complexities.store') }}" method="POST">
                 @csrf
                 <div class="box-body">
                     <div class="form-group">

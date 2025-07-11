@@ -24,7 +24,8 @@
             background: #fff;
             border-top: 1px solid #dee2e6;
         }
-        .nav-link:hover, .nav-link.active {
+        .nav-link:hover,
+        .nav-link.active {
             background-color: #3c8dbc !important;
             color: #fff !important;
         }
@@ -33,11 +34,10 @@
             padding: 3px 6px;
             margin-top: 4px;
         }
-        /* Admin Dashboard specific styles */
         .admin-dashboard-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 20px 20px 20px;
         }
         .admin-table-container {
             overflow-x: auto;
@@ -53,7 +53,7 @@
             border-collapse: separate;
             border-spacing: 0;
         }
-        .admin-table th, 
+        .admin-table th,
         .admin-table td {
             padding: 12px 15px;
             vertical-align: middle;
@@ -71,7 +71,6 @@
             border-bottom: 2px solid #dee2e6;
             z-index: 10;
         }
-        /* Specific column widths */
         .admin-table th:nth-child(1),
         .admin-table td:nth-child(1) {
             width: 30%;
@@ -100,7 +99,6 @@
             font-size: 1.1rem;
             font-weight: 600;
         }
-        /* Select2 custom styles */
         .select2-container--bootstrap-5 .select2-selection {
             min-height: 38px;
             padding: 5px;
@@ -109,9 +107,8 @@
             padding: 0.375rem 0.75rem;
             height: auto;
         }
-        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .admin-table th, 
+            .admin-table th,
             .admin-table td {
                 white-space: normal;
                 padding: 8px 10px;
@@ -127,409 +124,240 @@
             .admin-table td:nth-child(2) {
                 width: 30%;
             }
+            body, .content-wrapper, .content-header {
+                margin-top: 0 !important;
+                padding-top: 0 !important;
+            }
+            .admin-dashboard-container h1 {
+                margin-top: 0 !important;
+            }
         }
     </style>
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+{{-- NAVBAR --}}
+<nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    {{-- Left: Sidebar Toggle --}}
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#">
+                <i class="fas fa-bars"></i>
+            </a>
+        </li>
+    </ul>
 
-<div class="wrapper">
+    {{-- Right: Dark Mode & User Dropdown --}}
+    <ul class="navbar-nav ml-auto">
+        {{-- Dark Mode Toggle --}}
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="document.body.classList.toggle('dark-mode')">
+                <i class="fas fa-moon"></i>
+            </a>
+        </li>
 
-    {{-- NAVBAR --}}
-    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
-            </li>
-        </ul>
-
-        {{-- User Dropdown --}}
-            <li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}"
-                         class="img-circle elevation-2" width="30" alt="User Image">
-                    <span class="ml-2">{{ Auth::user()->name ?? 'Guest' }}</span>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                    <span class="dropdown-item dropdown-header">
-                        {{ Auth::user()->name ?? 'User' }}<br>
-                        <small>{{ Auth::user()->email ?? '' }}</small>
-                        @auth
-                            @if(auth()->user()->is_admin)
-                                <span class="badge badge-danger admin-badge d-block mt-1">Administrator</span>
-                            @endif
-                        @endauth
-                    </span>
-                    <div class="dropdown-divider"></div>
-                    <a href="{{ route('profile.edit') }}" class="dropdown-item">
-                        <i class="fas fa-user me-2"></i> Profile
+            {{-- Right-aligned User Dropdown --}}
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}"
+                             class="img-circle elevation-2" width="30" alt="User Image">
+                        <span class="ml-2">{{ Auth::user()->name ?? 'Guest' }}</span>
                     </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="dropdown-item text-danger">
-                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                        </button>
-                    </form>
-                </div>
-            </li>
-        </ul>
-    </nav>
-
-    {{-- SIDEBAR --}}
-
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="{{ route('dashboard') }}" class="brand-link text-center">
-        <i class="fas fa-check-circle me-2"></i>
-        <span class="brand-text font-weight-light">Task Manager</span>
-    </a>
-
-    <div class="sidebar">
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-                <li class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-home"></i>
-                        <p>Dashboard</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->is('tasks') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-tasks text-warning"></i>
-                        <p>My Tasks</p>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-toggle="modal" data-target="#createTaskModal">
-                        <i class="nav-icon fas fa-plus-circle text-success"></i>
-                        <p>Create Task</p>
-                    </a>
-                </li>
-
-                {{-- Admin Panel Dropdown --}}
-                @auth
-                    @if (Auth::user() && Auth::user()->isAdmin()) 
-                        <li class="nav-item has-treeview {{ request()->is('admin/*') ? 'menu-open' : '' }}">
-                            <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-user-shield text-lightblue"></i>
-                                <p>
-                                    Admin Dropdown
-
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <a href="{{ route('dashboard') }}" class="brand-link text-center">
-            <i class="fas fa-check-circle me-2"></i>
-            <span class="brand-text font-weight-light">Task Manager</span>
-        </a>
-
-        <div class="sidebar">
-            <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-                    <li class="nav-item">
-                        <a href="{{ route('admin.tasks.dashboard') }}" class="nav-link {{ request()->routeIs('admin.tasks.dashboard') ? 'active' : '' }}">
-                                 <i class="nav-icon fas fa-chart-pie text-info"></i>
-                                  <p>Task Dashboard</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->is('tasks') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-tasks text-warning"></i>
-                            <p>My Tasks</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('tasks.create') }}" class="nav-link {{ request()->is('tasks/create') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-plus-circle text-success"></i>
-                            <p>Create Task</p>
-                        </a>
-                    </li>
-
-                    {{-- Admin Menu --}}
-                    @auth
-                        @if(Auth::user() && Auth::user()->is_admin)
-                        <li class="nav-header text-uppercase text-muted mt-2"><small>Administration</small></li>
-                        
-                        {{-- Settings Dropdown --}}
-                        <li class="nav-item has-treeview {{ request()->is('admin/dashboard*') || request()->is('admin/users*') || request()->is('admin/statuses*') || request()->is('admin/complexities*') || request()->is('admin/groups*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ request()->is('admin/dashboard*') || request()->is('admin/users*') || request()->is('admin/statuses*') || request()->is('admin/complexities*') || request()->is('admin/groups*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-cog text-primary"></i>
-                                <p>
-                                    Admin Settings <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Dashboard</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.tasks.index') }}" class="nav-link {{ request()->routeIs('admin.tasks.index') ? 'active' : '' }}">
-                                        <i class="fas fa-list nav-icon"></i>
-                                        <p>All Tasks</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('admin.tasks.status', 1) }}" class="nav-link">
-                                        <i class="fas fa-info-circle nav-icon"></i>
-                                        <p>Task Status</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    @endif
-                @endauth
-
-                {{-- Profile --}}
-                <li class="nav-item">
-                    <a href="{{ route('profile.edit') }}" class="nav-link">
-                        <i class="nav-icon fas fa-user-cog text-info"></i>
-                        <p>Profile</p>
-                    </a>
-                </li>
-
-                {{-- Logout --}}
-                <li class="nav-item">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="nav-link btn btn-link text-left w-100">
-                            <i class="nav-icon fas fa-sign-out-alt text-danger"></i>
-                            <p>Logout</p>
-                        </button>
-                    </form>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <span class="dropdown-item dropdown-header">
+                            {{ Auth::user()->name ?? 'User' }}<br>
+                            <small>{{ Auth::user()->email ?? '' }}</small>
+                            @auth
+                                @if(auth()->user()->is_admin)
+                                    <span class="badge badge-danger admin-badge d-block mt-1">Administrator</span>
+                                @endif
+                            @endauth
+                        </span>
+                        <div class="dropdown-divider"></div>
+                    </div>
                 </li>
             </ul>
         </nav>
-    </div>
-</aside>
 
+        {{-- SIDEBAR --}}
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <a href="{{ route('dashboard') }}" class="brand-link text-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <span class="brand-text font-weight-light">Task Manager</span>
+            </a>
 
-                                {{-- Admin Dashboard --}}
+            <div class="sidebar">
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                        <li class="nav-item">
+                            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-home"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->is('tasks') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tasks text-warning"></i>
+                                <p>My Tasks</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#createTaskModal">
+                                <i class="nav-icon fas fa-plus-circle text-success"></i>
+                                <p>Create Task</p>
+                            </a>
+                        </li>
+
+                        @auth
+                            @if (Auth::user()->isAdmin())
+                                <li class="nav-header text-uppercase text-muted mt-2"><small>Administration</small></li>
+
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.tasks.dashboard') }}" class="nav-link {{ request()->routeIs('admin.tasks.dashboard') ? 'active' : '' }}">
+                                        <i class="nav-icon fas fa-chart-pie text-info"></i>
+                                        <p>Task Dashboard</p>
+                                    </a>
+                                </li>
+
                                 <li class="nav-item">
                                     <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->is('admin/dashboard') ? 'active' : '' }}">
                                         <i class="fas fa-tachometer-alt nav-icon"></i>
-                                        <p>Management Dashboard</p>
+                                        <p>Mgmt Dashboard</p>
                                     </a>
                                 </li>
-                                
-                                {{-- User Management --}}
-                                <li class="nav-item has-treeview {{ request()->is('admin/users*') ? 'menu-open' : '' }}">
-                                    <a href="#" class="nav-link {{ request()->is('admin/users*') ? 'active' : '' }}">
-                                        <i class="fas fa-users nav-icon"></i>
-                                        <p>
-                                            User Management
-                                            <i class="right fas fa-angle-left"></i>
-                                        </p>
+
+                                <li class="nav-item has-treeview {{ request()->is('admin/*') ? 'menu-open' : '' }}">
+                                    <a href="#" class="nav-link {{ request()->is('admin/*') ? 'active' : '' }}">
+                                        <i class="nav-icon fas fa-cog text-primary"></i>
+                                        <p>Admin Settings <i class="right fas fa-angle-left"></i></p>
                                     </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->is('admin/users') ? 'active' : '' }}">
+                                            <a href="{{ route('admin.tasks.index') }}" class="nav-link {{ request()->routeIs('admin.tasks.index') ? 'active' : '' }}">
                                                 <i class="fas fa-list nav-icon"></i>
+                                                <p>All Tasks</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{{ route('admin.tasks.status', 1) }}" class="nav-link">
+                                                <i class="fas fa-info-circle nav-icon"></i>
+                                                <p>Task Status</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{{ route('users.index') }}" class="nav-link">
+                                                <i class="fas fa-users nav-icon"></i>
                                                 <p>User Listing</p>
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="{{ route('admin.users.create') }}" class="nav-link {{ request()->is('admin/users/create') ? 'active' : '' }}">
-                                                <i class="fas fa-plus-circle nav-icon"></i>
-                                                <p>Add User</p>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                
-                                {{-- Status Management --}}
-                                <li class="nav-item has-treeview {{ request()->is('admin/statuses*') ? 'menu-open' : '' }}">
-                                    <a href="#" class="nav-link {{ request()->is('admin/statuses*') ? 'active' : '' }}">
-                                        <i class="fas fa-flag nav-icon"></i>
-                                        <p>
-                                            Status Management
-                                            <i class="right fas fa-angle-left"></i>
-                                        </p>
-                                    </a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{{ route('admin.statuses.index') }}" class="nav-link {{ request()->is('admin/statuses') ? 'active' : '' }}">
-                                                <i class="fas fa-list nav-icon"></i>
-                                                <p>Status Listing</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{{ route('admin.statuses.create') }}" class="nav-link {{ request()->is('admin/statuses/create') ? 'active' : '' }}">
-                                                <i class="fas fa-plus-circle nav-icon"></i>
-                                                <p>Add Status</p>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                
-                                {{-- Task Classification --}}
-                                <li class="nav-item has-treeview {{ request()->is('admin/complexities*') ? 'menu-open' : '' }}">
-                                    <a href="#" class="nav-link {{ request()->is('admin/complexities*') ? 'active' : '' }}">
-                                        <i class="fas fa-layer-group nav-icon"></i>
-                                        <p>
-                                            Task Classification
-                                            <i class="right fas fa-angle-left"></i>
-                                        </p>
-                                    </a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{{ route('admin.complexities.index') }}" class="nav-link {{ request()->is('admin/complexities') ? 'active' : '' }}">
-                                                <i class="fas fa-list nav-icon"></i>
+                                            <a href="{{ route('complexities.index') }}" class="nav-link">
+                                                <i class="fas fa-layer-group nav-icon"></i>
                                                 <p>Complexity Levels</p>
                                             </a>
                                         </li>
-                                        <li class="nav-item">
-                                            <a href="{{ route('admin.complexities.create') }}" class="nav-link {{ request()->is('admin/complexities/create') ? 'active' : '' }}">
-                                                <i class="fas fa-plus-circle nav-icon"></i>
-                                                <p>Add Complexity</p>
-                                            </a>
-                                        </li>
                                     </ul>
                                 </li>
-                                
-                                {{-- Group Management --}}
-                                <li class="nav-item has-treeview {{ request()->is('admin/groups*') ? 'menu-open' : '' }}">
-                                    <a href="#" class="nav-link {{ request()->is('admin/groups*') ? 'active' : '' }}">
-                                        <i class="fas fa-users-cog nav-icon"></i>
-                                        <p>
-                                            Group Management
-                                            <i class="right fas fa-angle-left"></i>
-                                        </p>
-                                    </a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{{ route('admin.groups.index') }}" class="nav-link {{ request()->is('admin/groups') ? 'active' : '' }}">
-                                                <i class="fas fa-list nav-icon"></i>
-                                                <p>Group Listing</p>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{{ route('admin.groups.create') }}" class="nav-link {{ request()->is('admin/groups/create') ? 'active' : '' }}">
-                                                <i class="fas fa-plus-circle nav-icon"></i>
-                                                <p>Add Group</p>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
 
-                        {{-- System Settings --}}
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.settings') }}" class="nav-link {{ request()->is('admin/settings') ? 'active' : '' }}">
+                                        <i class="nav-icon fas fa-sliders-h text-secondary"></i>
+                                        <p>System Settings</p>
+                                    </a>
+                                </li>
+                            @endif
+                        @endauth
+
                         <li class="nav-item">
-                            <a href="{{ route('admin.settings') }}" class="nav-link {{ request()->is('admin/settings') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-sliders-h text-secondary"></i>
-                                <p>System Settings</p>
+                            <a href="{{ route('profile.edit') }}" class="nav-link {{ request()->is('profile/edit') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user-cog text-info"></i>
+                                <p>Settings</p>
                             </a>
                         </li>
-                        @endif
-                    @endauth
 
-                    {{-- Regular User Settings --}}
-                    <li class="nav-item">
-                        <a href="{{ route('profile.edit') }}" class="nav-link">
-                            <i class="nav-icon fas fa-user-cog text-info"></i>
-                            <p>Settings</p>
-                        </a>
-                    </li>
-
-                    {{-- Logout --}}
-                    <li class="nav-item">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="nav-link btn btn-link text-left w-100">
-                                <i class="nav-icon fas fa-sign-out-alt text-danger"></i>
-                                <p>Logout</p>
-                            </button> 
-                        </form>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </aside>
-
-
-    {{-- CONTENT WRAPPER --}}
-    <div class="content-wrapper p-3">
-        @if(isset($header))
-            <div class="content-header">
-                <h1 class="m-0 text-capitalize">{{ $header }}</h1>
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="nav-link btn btn-link text-left w-100">
+                                    <i class="nav-icon fas fa-sign-out-alt text-danger"></i>
+                                    <p>Logout</p>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-        @endif
+        </aside>
 
-        <section class="content">
-
-            @yield('content')
-
-            @if(request()->is('admin*'))
-                <div class="admin-dashboard-container">
-                    @yield('content')
+        {{-- CONTENT WRAPPER --}}
+        <div class="content-wrapper p-0">
+            @if(isset($header))
+                <div class="content-header mb-3">
+                    <h1 class="m-0 text-capitalize">{{ $header }}</h1>
                 </div>
-            @else
-                @yield('content')
             @endif
 
-        </section>
+            <section class="content">
+                @if(request()->is('admin*'))
+                    <div class="admin-dashboard-container">
+                        @yield('content')
+                    </div>
+                @else
+                    @yield('content')
+                @endif
+            </section>
+        </div>
+
+        {{-- FOOTER --}}
+        <footer class="main-footer text-sm text-center">
+            <strong>&copy; {{ date('Y') }} Task Manager</strong> · Built by Vivian Mbachi and Eric Kyumu
+        </footer>
+
     </div>
 
-    {{-- FOOTER --}}
-    <footer class="main-footer text-sm text-center">
-        <strong>&copy; {{ date('Y') }} Task Manager</strong> · Built by Vivian Mbachi and Eric Kyumu
-
-    </footer>
-</div>
-
-{{-- Scripts --}}
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-
-
-<!-- ✅ Chart.js should go here -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-{{-- Task Modal --}}
+    {{-- Modal --}}
     @include('tasks._create_modal')
+
+    {{-- Scripts --}}
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    {{-- Create Task Ajax --}}
     <script>
-<script>
-$(document).ready(function () {
-    $('#createTaskForm').on('submit', function (e) {
-        e.preventDefault();
-        let form = $(this);
+        $(document).ready(function () {
+            $('#createTaskForm').on('submit', function (e) {
+                e.preventDefault();
+                let form = $(this);
 
-        $.ajax({
-            url: form.attr('action'),
-            method: 'POST',
-            data: form.serialize(),
-            success: function (response) {
-                $('#taskSuccessMsg').removeClass('d-none').fadeIn();
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        $('#taskSuccessMsg').removeClass('d-none').fadeIn();
 
-                setTimeout(() => {
-                    $('#createTaskModal').modal('hide');
-                    form[0].reset();
-                    $('#taskSuccessMsg').addClass('d-none');
-                }, 1500);
-            },
-            error: function (xhr) {
-                alert('Error: ' + (xhr.responseJSON?.message || 'Something went wrong.'));
-            }
+                        setTimeout(() => {
+                            $('#createTaskModal').modal('hide');
+                            form[0].reset();
+                            $('#taskSuccessMsg').addClass('d-none');
+                        }, 1500);
+                    },
+                    error: function (xhr) {
+                        alert('Error: ' + (xhr.responseJSON?.message || 'Something went wrong.'));
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 
-@stack('scripts')
-
+    @stack('scripts')
 </body>
 </html>
-
-{{-- Select2 JS --}}
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-{{-- Toastr JS --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-</body>
-</html>
-

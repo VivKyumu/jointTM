@@ -14,15 +14,16 @@ class GroupController extends Controller
     }
 
     public function index()
-    {
-        $groups = Group::withCount('users')->latest()->paginate(10);
-        return view('admin.groups.index', compact('groups'));
-    }
+{
+    $groups = Group::with('users')->latest()->paginate(10);
+    return view('admin.groups.index', compact('groups'));
+}
+
 
     public function create()
     {
         $users = User::all();
-        return view('admin.groups.create', compact('users'));
+        return view('admin.groups.index', compact('users'));
     }
 
     public function store(Request $request)
@@ -39,7 +40,7 @@ class GroupController extends Controller
             $group->users()->sync($validated['users']);
         }
 
-        return redirect()->route('admin.groups.index')
+        return redirect()->route('groups.index')
             ->with('success', 'Group created successfully');
     }
 
@@ -49,7 +50,7 @@ class GroupController extends Controller
             $query->where('group_id', $group->id);
         })->get();
 
-        return view('admin.groups.show', [
+        return view('admin.groups.index', [
             'group' => $group->load('users'),
             'availableUsers' => $availableUsers
         ]);
@@ -58,7 +59,7 @@ class GroupController extends Controller
     public function edit(Group $group)
     {
         $users = User::all();
-        return view('admin.groups.edit', [
+        return view('admin.groups.index', [
             'group' => $group,
             'users' => $users
         ]);
@@ -75,7 +76,7 @@ class GroupController extends Controller
         $group->update(['name' => $validated['name']]);
         $group->users()->sync($validated['users'] ?? []);
 
-        return redirect()->route('admin.groups.index')
+        return redirect()->route('groups.index')
             ->with('success', 'Group updated successfully');
     }
 
@@ -84,7 +85,7 @@ class GroupController extends Controller
         $group->users()->detach();
         $group->delete();
         
-        return redirect()->route('admin.groups.index')
+        return redirect()->route('groups.index')
             ->with('success', 'Group deleted successfully');
     }
 
@@ -119,4 +120,11 @@ class GroupController extends Controller
             'message' => 'Group users synchronized successfully'
         ]);
     }
+
+    public function users(Group $group)
+{
+    $users = $group->users()->paginate(10);
+    return view('groups.users', compact('group', 'users'));
+}
+
 }

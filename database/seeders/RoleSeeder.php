@@ -13,14 +13,16 @@ class RoleSeeder extends Seeder
      * Run the database seeds.
      */
 public function run()
-{
-    // Admin user
-    User::create([
+{User::firstOrCreate(
+    ['email' => 'admin@example.com'], // unique field
+    [
         'name' => 'Admin User',
-        'email' => 'admin@example.com',
-        'password' => Hash::make('password'),
+        'password' => bcrypt('password'), // or use Hash::make()
         'role' => 'admin',
-    ]);
+    ]
+);
+
+    
 
     // Normal user
     User::create([

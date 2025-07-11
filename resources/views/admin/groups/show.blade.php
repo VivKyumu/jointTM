@@ -7,7 +7,7 @@
                 <h1>Group Details</h1>
             </div>
             <div class="col-md-6 text-right">
-                <a href="{{ route('admin.groups.index') }}" class="btn btn-default">
+                <a href="{{ route('groups.index') }}" class="btn btn-default">
                     <i class="fa fa-arrow-left"></i> Back to List
                 </a>
             </div>
@@ -35,7 +35,7 @@
                         </table>
                     </div>
                     <div class="box-footer">
-                        <a href="{{ route('admin.groups.edit', $group->id) }}" class="btn btn-primary">Edit</a>
+                        <a href="{{ route('groups.create', $group->id) }}" class="btn btn-primary">Edit</a>
                     </div>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                         <h3 class="box-title">Group Members</h3>
                     </div>
                     <div class="box-body">
-                        <form action="{{ route('admin.groups.addUser', $group->id) }}" method="POST">
+                        <form action="{{ route('groups.addUser', $group->id) }}" method="POST">
                             @csrf
                             <div class="input-group">
                                 <select name="user_id" class="form-control" required>
@@ -67,7 +67,7 @@
                             @foreach($group->users as $user)
                             <li class="list-group-item">
                                 {{ $user->name }} ({{ $user->email }})
-                                <form action="{{ route('admin.groups.removeUser', [$group->id, $user->id]) }}" 
+                                <form action="{{ route('groups.removeUser', [$group->id, $user->id]) }}" 
                                     method="POST" style="display:inline; float:right;">
                                     @csrf
                                     <button type="submit" class="btn btn-xs btn-danger" 

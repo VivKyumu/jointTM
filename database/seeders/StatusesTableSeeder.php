@@ -7,21 +7,18 @@ use App\Models\Status;
 
 class StatusesTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $statuses = [
-            ['name' => 'Pending', 'color' => '#f39c12'],
-            ['name' => 'In Progress', 'color' => '#00c0ef'],
-            ['name' => 'On Hold', 'color' => '#605ca8'],
+        $additionalStatuses = [
             ['name' => 'Complete', 'color' => '#00a65a'],
             ['name' => 'Created', 'color' => '#3c8dbc'],
         ];
-        
-        foreach ($statuses as $status) {
-            Status::create($status);
+
+        foreach ($additionalStatuses as $status) {
+            Status::firstOrCreate(
+                ['name' => $status['name']],
+                ['color' => $status['color'], 'order' => 0]
+            );
         }
     }
 }

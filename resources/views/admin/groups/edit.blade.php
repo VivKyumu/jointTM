@@ -7,7 +7,7 @@
                 <h1>Edit Group</h1>
             </div>
             <div class="col-md-6 text-right">
-                <a href="{{ route('admin.groups.index') }}" class="btn btn-default">
+                <a href="{{ route('groups.index') }}" class="btn btn-default">
                     <i class="fa fa-arrow-left"></i> Back to List
                 </a>
             </div>
@@ -18,7 +18,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Group Details</h3>
             </div>
-            <form action="{{ route('admin.groups.update', $group->id) }}" method="POST">
+            <form action="{{ route('groups.update', $group->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="box-body">

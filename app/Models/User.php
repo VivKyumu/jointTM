@@ -55,4 +55,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Group::class)->withTimestamps();
     }
+
+    // In User.php
+    public function status()
+{
+    return $this->belongsTo(Status::class);
+}
+ 
 }

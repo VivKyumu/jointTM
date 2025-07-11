@@ -138,4 +138,17 @@ class AdminTaskController extends Controller
         $task->delete();
         return redirect()->route('admin.tasks.index')->with('success', 'Task deleted successfully.');
     }
+
+    // 🔧 Update complexity
+    public function updateComplexity(Request $request, Task $task)
+{
+    $request->validate([
+        'complexity_id' => 'required|exists:task_complexities,id',
+    ]);
+
+    $task->complexity_id = $request->input('complexity_id');
+    $task->save();
+
+    return back()->with('success', 'Complexity updated successfully.');
+}
 }

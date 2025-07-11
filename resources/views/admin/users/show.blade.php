@@ -7,7 +7,7 @@
                 <h1>User Details</h1>
             </div>
             <div class="col-md-6 text-right">
-                <a href="{{ route('admin.users.index') }}" class="btn btn-default">
+                <a href="{{ route('users.index') }}" class="btn btn-default">
                     <i class="fa fa-arrow-left"></i> Back to List
                 </a>
             </div>
@@ -53,7 +53,7 @@
                 </table>
             </div>
             <div class="box-footer">
-                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-primary">Edit</a>
+                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary">Edit</a>
             </div>
         </div>
     </section>

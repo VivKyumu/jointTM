@@ -9,7 +9,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Complexity Details</h3>
             </div>
-            <form action="{{ route('admin.complexities.update', $complexity->id) }}" method="POST">
+            <form action="{{ route('complexities.update', $complexity->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="box-body">
@@ -28,7 +28,7 @@
                 </div>
                 <div class="box-footer">
                     <button type="submit" class="btn btn-primary">Update Level</button>
-                    <a href="{{ route('admin.complexities.index') }}" class="btn btn-default">Cancel</a>
+                    <a href="{{ route('complexities.index') }}" class="btn btn-default">Cancel</a>
                 </div>
             </form>
         </div>

@@ -159,20 +159,8 @@ class TaskController extends Controller
         ]);
     }
 
-    // 🔧 Update complexity
-    public function updateComplexity(Request $request, Task $task)
-    {
-        $validComplexities = [1, 2, 3, 4, 5];
+ 
 
-        $request->validate([
-            'complexity_id' => ['required', Rule::in($validComplexities)],
-        ]);
-
-        $task->update(['complexity_id' => $request->complexity_id]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Complexity updated successfully',
-        ]);
-    }
 }
+
+

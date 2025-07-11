@@ -11,7 +11,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">User Details</h3>
             </div>
-            <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
+            <form action="{{ route('users.update', $user->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="box-body">

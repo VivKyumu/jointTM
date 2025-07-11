@@ -3,87 +3,99 @@
 @section('content')
 <div class="content-wrapper">
     <section class="content-header">
-        <div class="row">
-            <div class="col-md-6">
-                <h1>User Groups Management</h1>
-            </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Group Management</h1>
             @if(auth()->user()->is_admin)
-            <div class="col-md-6 text-right">
-                <a href="{{ route('admin.groups.create') }}" class="btn btn-primary">
-                    <i class="fa fa-plus"></i> Create New Group
-                </a>
-            </div>
+            <a href="{{ route('groups.create') }}" class="btn btn-primary">
+                <i class="fa fa-plus"></i> Create New Group
+            </a>
             @endif
         </div>
     </section>
 
     <section class="content">
-        <div class="box">
-            <div class="box-header with-border">
-                <h3 class="box-title">All User Groups</h3>
-                <div class="box-tools">
-                    <form action="{{ route('admin.groups.index') }}" method="GET">
-                        <div class="input-group input-group-sm" style="width: 200px;">
-                            <input type="text" name="search" class="form-control pull-right" 
-                                   placeholder="Search..." value="{{ request('search') }}">
-                            <div class="input-group-btn">
-                                <button type="submit" class="btn btn-default">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="card-title">All Groups</h3>
             </div>
-            <div class="box-body">
+            <div class="card-body">
                 @if($groups->isEmpty())
                     <div class="alert alert-info">
-                        No groups found. @if(auth()->user()->is_admin)Would you like to <a href="{{ route('admin.groups.create') }}">create one</a>?@endif
+                        No groups found. 
+                        @if(auth()->user()->is_admin)
+                        Would you like to <a href="{{ route('groups.create') }}">create one</a>?
+                        @endif
                     </div>
                 @else
-                    <table class="table table-bordered table-hover">
-                        <thead class="thead-light">
-                            <tr>
-                                <th width="5%">ID</th>
-                                <th>Group Name</th>
-                                <th width="15%">Users Count</th>
-                                @if(auth()->user()->is_admin)
-                                <th width="20%">Actions</th>
-                                @endif
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($groups as $group)
-                            <tr>
-                                <td>{{ $group->id }}</td>
-                                <td>{{ $group->name }}</td>
-                                <td class="text-center">
-                                    <span class="badge bg-blue">{{ $group->users_count }}</span>
-                                </td>
-                                @if(auth()->user()->is_admin)
-                                <td class="text-center">
-                                    <a href="{{ route('admin.groups.edit', $group->id) }}" 
-                                       class="btn btn-sm btn-info" title="Edit">
-                                        <i class="fa fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('admin.groups.destroy', $group->id) }}" 
-                                          method="POST" style="display:inline-block;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" 
-                                                title="Delete" onclick="return confirm('Are you sure?')">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                                @endif
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th rowspan="2" style="width: 5%" class="align-middle">ID</th>
+                                    <th rowspan="2" class="align-middle">Group Name</th>
+                                    <th colspan="3" class="text-center">Group Members</th>
+                                    @if(auth()->user()->is_admin)
+                                    <th rowspan="2" class="text-center align-middle" style="width: 20%">Actions</th>
+                                    @endif
+                                </tr>
+                                <tr>
+                                    <th class="text-center">Admins</th>
+                                    <th class="text-center">Users</th>
+                                    <th class="text-center">Guests</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($groups as $group)
+                                <tr>
+                                    <td>{{ $group->id }}</td>
+                                    <td>{{ $group->name }}</td>
+
+                                    {{-- Count of Admins --}}
+                                    <td class="text-center">
+                                        <span class="badge bg-danger">
+                                            {{ $group->users->filter(fn($u) => $u->is_admin)->count() }}
+                                        </span>
+                                    </td>
+
+                                    {{-- Count of Users --}}
+                                    <td class="text-center">
+                                        <span class="badge bg-success">
+                                            {{ $group->users->filter(fn($u) => $u->roles->contains('name', 'user'))->count() }}
+                                        </span>
+                                    </td>
+
+                                    {{-- Count of Guests --}}
+                                    <td class="text-center">
+                                        <span class="badge bg-secondary">
+                                            {{ $group->users->filter(fn($u) => $u->roles->contains('name', 'guest'))->count() }}
+                                        </span>
+                                    </td>
+
+                                    @if(auth()->user()->is_admin)
+                                    <td class="text-center">
+                                        <a href="{{ route('groups.edit', $group->id) }}" 
+                                           class="btn btn-sm btn-info" title="Edit">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('groups.destroy', $group->id) }}" 
+                                              method="POST" style="display:inline-block;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    title="Delete" onclick="return confirm('Are you sure?')">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    @endif
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 @endif
             </div>
-            <div class="box-footer clearfix">
+            <div class="card-footer clearfix">
                 <div class="float-right">
                     {{ $groups->appends(request()->query())->links() }}
                 </div>

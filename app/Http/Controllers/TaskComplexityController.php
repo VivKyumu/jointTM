@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TaskComplexity;
 use Illuminate\Http\Request;
+use App\Models\Task;
 
 class TaskComplexityController extends Controller
 {
@@ -12,11 +13,15 @@ class TaskComplexityController extends Controller
         $this->middleware('is_admin');
     }
 
-    public function index()
-    {
-        $complexities = TaskComplexity::orderBy('level')->get();
-        return view('admin.complexities.index', compact('complexities'));
-    }
+   public function index()
+{
+    $complexities = TaskComplexity::orderBy('level')->get();
+    $tasks = Task::with(['user', 'complexity'])->paginate(10); // Paginate 10 per page
+
+    return view('admin.tasks.index', compact('complexities', 'tasks'));
+}
+
+
 
     public function create()
     {
@@ -36,8 +41,10 @@ class TaskComplexityController extends Controller
     }
 
     public function show(TaskComplexity $complexity)
-    {
-        return view('admin.complexities.show', compact('complexity'));
+    {$tasks = Task::with(['user', 'complexity'])->get(); // Eager load relationships
+    $complexities = TaskComplexity::all(); // For the dropdown
+
+    return view('admin.tasks.index', compact('tasks', 'complexities'));
     }
 
     public function edit(TaskComplexity $complexity)

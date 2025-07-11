@@ -8,12 +8,13 @@
 
 @section('content')
     <div class="card shadow-sm">
-        <div class="card-header">
+         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">Task List</h5>
         </div>
         <div class="card-body">
             @if ($tasks->count())
-                <table class="table table-bordered">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="bg-primary text-white">
                     <tr>
         <th>Title</th>
         <th>Status</th>
@@ -52,4 +53,13 @@
             @endif
         </div>
     </div>
+
+    {{-- Optional Badge Styling --}}
+    <style>
+        .badge {
+            padding: 0.4em 0.75em;
+            font-size: 0.85rem;
+            border-radius: 0.5rem;
+        }
+    </style>
 @endsection

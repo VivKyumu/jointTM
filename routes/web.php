@@ -48,34 +48,34 @@ Route::middleware(['auth'])->group(function () {
 | Admin Routes (auth + is_admin middleware)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'is_admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
 
-    // Admin Dashboard and Settings
-    Route::controller(AdminController::class)->group(function () {
-        Route::get('/dashboard', 'dashboard')->name('dashboard');
-        Route::get('/settings', 'settings')->name('settings');
-        Route::post('/settings', 'updateSettings')->name('settings.update');
-        Route::post('/users/{user}/groups', 'updateUserGroups')->name('users.groups.update');
+        Route::get('/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/settings', [App\Http\Controllers\AdminController::class, 'settings'])->name('settings');
+        Route::post('/settings', [App\Http\Controllers\AdminController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/users/{user}/groups', [App\Http\Controllers\AdminController::class, 'updateUserGroups'])->name('users.groups.update');
+
+        // Task Management
+        Route::get('/task-dashboard', [App\Http\Controllers\AdminTaskController::class, 'taskdashboard'])->name('tasks.dashboard');
+        Route::get('/tasks', [App\Http\Controllers\AdminTaskController::class, 'index'])->name('tasks.index');
+        Route::get('/tasks/create', [App\Http\Controllers\AdminTaskController::class, 'create'])->name('tasks.create');
+        Route::post('/tasks', [App\Http\Controllers\AdminTaskController::class, 'store'])->name('tasks.store');
+        Route::get('/tasks/{task}', [App\Http\Controllers\AdminTaskController::class, 'show'])->name('tasks.show');
+        Route::get('/tasks/{task}/edit', [App\Http\Controllers\AdminTaskController::class, 'edit'])->name('tasks.edit');
+        Route::put('/tasks/{task}', [App\Http\Controllers\AdminTaskController::class, 'update'])->name('tasks.update');
+        Route::delete('/tasks/{task}', [App\Http\Controllers\AdminTaskController::class, 'destroy'])->name('tasks.destroy');
+        Route::post('/tasks/{task}/disable', [App\Http\Controllers\AdminTaskController::class, 'disable'])->name('tasks.disable');
+        Route::get('/tasks/{task}/status', [App\Http\Controllers\AdminTaskController::class, 'showAllTaskStatuses'])->name('tasks.status');
+        Route::post('/tasks/{task}/status', [App\Http\Controllers\AdminTaskController::class, 'updateStatus'])->name('tasks.status.update');
+        Route::post('/tasks/{task}/disable/confirm', [App\Http\Controllers\AdminTaskController::class, 'showDisableForm'])->name('tasks.disable.form');
+       Route::put('/tasks/{task}/complexity', [App\Http\Controllers\AdminTaskController::class, 'updateComplexity'])->name('tasks.complexity.update');
     });
 
-    // Task Management (Admin)
-    
-    Route::controller(AdminTaskController::class)->group(function () {
-        Route::get('/task-dashboard', 'taskdashboard')->name('admin.tasks.dashboard');
-        Route::get('/tasks', 'index')->name('tasks.index');
-        Route::get('/tasks/create', 'create')->name('tasks.create');
-        Route::post('/tasks', 'store')->name('tasks.store');
-        Route::get('/tasks/{task}', 'show')->name('tasks.show');
-        Route::get('/tasks/{task}/edit', 'edit')->name('tasks.edit');
-        Route::put('/tasks/{task}', 'update')->name('tasks.update');
-        Route::delete('/tasks/{task}', 'destroy')->name('tasks.destroy');
 
-        // Custom task routes
-        Route::post('/tasks/{task}/disable', 'disable')->name('tasks.disable');
-        Route::get('/tasks/{task}/status', 'showAllTaskStatuses')->name('tasks.status');
-        Route::post('/tasks/{task}/status', 'updateStatus')->name('tasks.status.update');
-        Route::post('/tasks/{task}/disable/confirm', 'showDisableForm')->name('tasks.disable.form');
-    });
 
     // Admin User Management
     Route::prefix('users')->name('users.')->controller(UserController::class)->group(function () {
@@ -103,6 +103,8 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
         Route::post('/{group}/add-user', 'addUser')->name('addUser');
         Route::delete('/{group}/remove-user/{user}', 'removeUser')->name('removeUser');
         Route::put('/{group}/sync-users', 'syncUsers')->name('syncUsers');
+        Route::get('/groups/{group}/users', [GroupController::class, 'users'])->name('groups.users');
+
     });
 
     // Status Management
@@ -126,7 +128,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
         Route::put('/{complexity}', 'update')->name('update');
         Route::delete('/{complexity}', 'destroy')->name('destroy');
     });
-});
+
 
 /*
 |--------------------------------------------------------------------------
