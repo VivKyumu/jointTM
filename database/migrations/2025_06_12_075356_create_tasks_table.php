@@ -14,7 +14,9 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('status')->default('pending');
-            $table->timestamps();
+            $table->timestamps(); // includes created_at & updated_at
+            $table->dateTime('due_at')->nullable(); // Will be set in model/controller
+            $table->foreignId('complexity_id')->constrained()->onDelete('set null')->nullable(); // New F
         });
     }
 

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use App\Models\User;
+use App\Models\ActivityLog;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -34,9 +35,12 @@ class AuthenticatedSessionController extends Controller
         // 3. Get the currently authenticated user
         /** @var User|null $user */
         $user = Auth::user();
+        if ($user && $user->isAdmin()) {
+            ActivityLog::record('Admin Login', "{$user->name} logged in.", $user->id);
+        }
 
         // 4. Redirect based on role
-        return redirect()->intended($user && $user->is_admin ? '/admin' : '/dashboard');
+        return redirect()->intended($user && $user->isAdmin() ? '/admin' : ($user && $user->isManager() ? '/admin/task-dashboard' : '/dashboard'));
     }
 
     /**

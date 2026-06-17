@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\Task;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -14,38 +13,52 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create 3 regular users
-        User::factory(3)->create();
+        User::whereIn('email', ['test@example.com', 'user@example.com'])
+            ->orWhere('email', 'like', '%@example.org')
+            ->orWhere('email', 'like', '%@example.net')
+            ->delete();
 
-        // Safely create or update admin user
-        User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'is_admin' => true
-            ]
-        );
+        $users = [
+            ['name' => 'Admin User', 'email' => 'admin@example.com', 'is_admin' => true],
+            ['name' => 'Vivian Mbachi', 'email' => 'vivian.mbachi@example.com', 'is_admin' => false],
+            ['name' => 'Eric Kyumu', 'email' => 'eric.kyumu@example.com', 'is_admin' => false],
+            ['name' => 'Grace Wanjiku', 'email' => 'grace.wanjiku@example.com', 'is_admin' => false],
+            ['name' => 'Brian Otieno', 'email' => 'brian.otieno@example.com', 'is_admin' => false],
+            ['name' => 'Mercy Achieng', 'email' => 'mercy.achieng@example.com', 'is_admin' => false],
+        ];
 
-        // Create a specific user
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $seedEmails = collect($users)->pluck('email')->all();
 
-        // Create 3 regular users if they don't exist (excluding admin and test user)
-        if (User::count() <= 2) { // Adjusted condition to allow test + admin
-            User::factory(3)->create();
+        User::where(function ($query) {
+                $query->where('email', 'like', '%@example.com')
+                    ->orWhere('email', 'like', '%@example.org')
+                    ->orWhere('email', 'like', '%@example.net');
+            })
+            ->whereNotIn('email', $seedEmails)
+            ->delete();
+
+        foreach ($users as $user) {
+            User::updateOrCreate(
+                ['email' => $user['email']],
+                [
+                    'name' => $user['name'],
+                    'password' => Hash::make('password123'),
+                    'role' => $user['is_admin'] ? 'admin' : 'staff',
+                    'is_admin' => $user['is_admin'],
+                    'is_active' => true,
+                ]
+            );
         }
 
         // Seed default application data
         $this->call([
             RoleSeeder::class,
             StatusSeeder::class,
-            StatusesTableSeeder::class,
             GroupSeeder::class,
             TaskComplexitiesTableSeeder::class,
             TaskSeeder::class,
+            DemoDataSeeder::class,
+            ManagerRoleSeeder::class,
         ]);
     }
 }

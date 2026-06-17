@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TaskComplexity;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Models\User;
 
 class TaskComplexityController extends Controller
 {
@@ -47,10 +48,20 @@ class TaskComplexityController extends Controller
     return view('admin.tasks.index', compact('tasks', 'complexities'));
     }
 
-    public function edit(TaskComplexity $complexity)
-    {
-        return view('admin.complexities.edit', compact('complexity'));
-    }
+    public function edit(Task $task)
+{
+    $users = User::all();
+
+    $complexities = [
+        ['name' => 'Very Simple', 'level' => 1],
+        ['name' => 'Simple', 'level' => 2],
+        ['name' => 'Medium', 'level' => 3],
+        ['name' => 'Complex', 'level' => 4],
+        ['name' => 'Very Complex', 'level' => 5],
+    ];
+
+    return view('admin.complexities.edit', compact('task', 'users', 'complexities'));
+}
 
     public function update(Request $request, TaskComplexity $complexity)
     {

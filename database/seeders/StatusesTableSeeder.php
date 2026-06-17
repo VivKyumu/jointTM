@@ -9,15 +9,20 @@ class StatusesTableSeeder extends Seeder
 {
     public function run(): void
     {
-        $additionalStatuses = [
-            ['name' => 'Complete', 'color' => '#00a65a'],
-            ['name' => 'Created', 'color' => '#3c8dbc'],
+        $statuses = [
+            ['name' => 'Pending', 'color' => '#64748b', 'order' => 1],
+            ['name' => 'In Progress', 'color' => '#f59e0b', 'order' => 2],
+            ['name' => 'Completed', 'color' => '#0f766e', 'order' => 3],
+            ['name' => 'On Hold', 'color' => '#2563eb', 'order' => 4],
         ];
 
-        foreach ($additionalStatuses as $status) {
-            Status::firstOrCreate(
+        foreach ($statuses as $status) {
+            Status::updateOrCreate(
                 ['name' => $status['name']],
-                ['color' => $status['color'], 'order' => 0]
+                [
+                    'color' => $status['color'],
+                    'order' => $status['order'],
+                ]
             );
         }
     }

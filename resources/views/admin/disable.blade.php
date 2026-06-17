@@ -1,5 +1,7 @@
 @extends('layouts.partials')
 
+@section('title', 'Disable User')
+
 @section('content')
 <div class="container-fluid mt-4">
     <div class="card shadow">

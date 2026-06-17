@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+
 
 class Task extends Model
 {
@@ -13,10 +16,15 @@ class Task extends Model
     protected $fillable = [
         'title',
         'description',
+        'timestamp',
         'user_id',
+        'status',
         'status_id',
         'complexity_id',
-        'due_date',
+        'due_at',
+        'completed_at',
+
+        
     ];
 
     /**
@@ -39,16 +47,22 @@ class Task extends Model
      * The complexity level of the task.
      */
     public function complexity(): BelongsTo
-    {
-        return $this->belongsTo(TaskComplexity::class, 'complexity_id');
-    }
+{
+    return $this->belongsTo(TaskComplexity::class, 'complexity_id');
+}
 
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class)->latest();
+    }
     /**
      * Get the current status name.
      */
     public function getStatusNameAttribute(): string
     {
-        return $this->status->name ?? $this->attributes['status'] ?? 'No Status';
+        $status = $this->getRelationValue('status');
+
+        return $status?->name ?? $this->attributes['status'] ?? 'No Status';
     }
 
     /**
@@ -56,7 +70,9 @@ class Task extends Model
      */
     public function getStatusColorAttribute(): string
     {
-        return $this->status->color ?? '#777';
+        $status = $this->getRelationValue('status');
+
+        return $status?->color ?? '#777';
     }
 
     /**
@@ -74,4 +90,59 @@ class Task extends Model
     {
         return $this->complexity->color ?? '#777';
     }
+    
+    protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($task) {
+        if (!$task->due_at && $task->complexity_id) {
+            $complexity = TaskComplexity::find($task->complexity_id);
+            if ($complexity) {
+                $task->due_at = $complexity->getDueDate();
+            }
+        }
+    });
+}
+protected $casts = [
+    'due_at' => 'datetime',
+    'completed_at' => 'datetime',
+];
+
+// In Task.php
+protected static function booted()
+{
+    static::creating(function ($task) {
+        if (!$task->due_at && $task->complexity_id) {
+            $complexity = TaskComplexity::find($task->complexity_id);
+            if ($complexity) {
+                $task->due_at = $complexity->getDueDate();
+            }
+        }
+    });
+
+    static::saving(function ($task) {
+        if ($task->status === 'completed' && is_null($task->completed_at)) {
+            $task->completed_at = now();
+        } elseif ($task->status !== 'completed') {
+            $task->completed_at = null;
+        }
+    });
+}
+
+public function syncCompletedAt()
+{
+    $status = $this->attributes['status'] ?? null;
+
+    if ($status === 'completed' && is_null($this->completed_at)) {
+        $this->completed_at = now();
+    } elseif ($status !== 'completed') {
+        $this->completed_at = null;
+    }
+}
+
+
+
+
+    
 }

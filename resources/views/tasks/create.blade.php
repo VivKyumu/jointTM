@@ -22,6 +22,18 @@
                     <textarea name="description" id="description" class="form-control" rows="3"></textarea>
                 </div>
 
+                <div class="mb-3">
+                    <label for="complexity_id" class="form-label">Complexity</label>
+                     <select name="complexity_id" id="complexity_id" class="form-control" required>
+                        @foreach ($complexities as $complexity)
+                              <option value="{{ $complexity->id }}">
+                                    {{ $complexity->name }} ({{ $complexity->duration }} days)
+                               </option>
+                        @endforeach
+                        </select>
+                        </div>
+
+
                 <button type="submit" class="btn btn-primary">Create Task</button>
             </form>
         </div>

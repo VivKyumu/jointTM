@@ -1,9 +1,11 @@
 @extends('layouts.partials')
 
+@section('title', 'Task Status')
+
 @section('content')
 <div class="container-fluid mt-4">
     <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
             <h3 class="card-title mb-0">
                 <i class="fas fa-tasks"></i> Task Status
             </h3>
@@ -19,8 +21,8 @@
 
             {{-- ✅ Task Table --}}
             <div class="table-responsive">
-                <table class="table table-bordered table-hover text-center">
-                    <thead class="thead-dark">
+                <table class="table table-striped table-hover rounded shadow-sm bg-white align-middle">
+                    <thead class="bg-secondary text-white">
                         <tr>
                             <th><i class="fas fa-id-badge"></i> User ID</th>
                             <th><i class="fas fa-user"></i> User Name</th>
@@ -58,7 +60,7 @@
                                                 <option value="on hold"      @selected($task->status == 'on hold')>On Hold</option>
                                                 <option value="completed"    @selected($task->status == 'completed')>Completed</option>
                                             </select>
-                                            <span class="input-group-text bg-primary text-white">
+                                            <span class="input-group-text bg-secondary text-white">
                                                 <i class="fas fa-sync-alt"></i>
                                             </span>
                                         </div>

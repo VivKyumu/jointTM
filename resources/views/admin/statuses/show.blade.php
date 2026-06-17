@@ -1,4 +1,5 @@
 @extends('layouts.partials')
+@section('title', 'Status Details')
 @section('content')
 <div class="content-wrapper">
     <section class="content-header">
@@ -7,7 +8,7 @@
                 <h1>Status Details</h1>
             </div>
             <div class="col-md-6 text-right">
-                <a href="{{ route('admin.statuses.index') }}" class="btn btn-default">
+                <a href="{{ route('statuses.index') }}" class="btn btn-default">
                     <i class="fa fa-arrow-left"></i> Back to List
                 </a>
             </div>
@@ -41,7 +42,7 @@
                 </table>
             </div>
             <div class="box-footer">
-                <a href="{{ route('admin.statuses.edit', $status->id) }}" class="btn btn-primary">Edit</a>
+                <a href="{{ route('statuses.edit', $status->id) }}" class="btn btn-primary">Edit</a>
             </div>
         </div>
     </section>

@@ -1,5 +1,7 @@
 @extends('layouts.partials')
 
+@section('title', 'Edit Admin')
+
 @section('content')
 <div class="container">
     <h2>Edit Task</h2>
@@ -38,7 +40,23 @@
             </select>
         </div>
 
+        <div class="form-group">
+            <label for="complexity_id" class="form-label">Complexity</label>
+            <select name="complexity_id" id="complexity_id" class="form-control" required>
+                <option value="" disabled {{ is_null($task->complexity_id) ? 'selected' : '' }}>Select Complexity</option>
+                @foreach ($complexities as $complexity)
+                    <option value="{{ $complexity->id }}" {{ old('complexity_id', $task->complexity_id) == $complexity->id ? 'selected' : '' }}>
+                        {{ $complexity->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('complexity_id')
+                <div class="text-danger">{{ $message }}</div>
+            @enderror
+        </div>
+
         <button type="submit" class="btn btn-success">Update Task</button>
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 @endsection

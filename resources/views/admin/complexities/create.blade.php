@@ -1,5 +1,7 @@
 @extends('layouts.partials')
 
+@section('title', 'Create Complexity')
+
 @section('content')
 <div class="content-wrapper">
     <section class="content-header">

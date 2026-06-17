@@ -32,7 +32,7 @@ class StatusController extends Controller
         ]);
 
         Status::create($validated);
-        return redirect()->route('admin.statuses.index')->with('success', 'Status created successfully');
+        return redirect()->route('statuses.index')->with('success', 'Status created successfully');
     }
 
     public function show(Status $status)
@@ -54,7 +54,7 @@ class StatusController extends Controller
 
         $status->update($validated);
 
-        return redirect()->route('admin.statuses.index')
+        return redirect()->route('statuses.index')
             ->with('success', 'Status updated successfully');
     }
 
@@ -62,7 +62,7 @@ class StatusController extends Controller
     {
         $status->delete();
         
-        return redirect()->route('admin.statuses.index')
+        return redirect()->route('statuses.index')
             ->with('success', 'Status deleted successfully');
     }
 }

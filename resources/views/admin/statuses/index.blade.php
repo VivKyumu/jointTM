@@ -1,5 +1,7 @@
 @extends('layouts.partials')
 
+@section('title', 'Statuses')
+
 @section('content')
 <div class="content-wrapper">
     <section class="content-header">
@@ -9,7 +11,7 @@
             </div>
             @if(auth()->user()->is_admin)
             <div class="col-md-6 text-right">
-                <a href="{{ route('admin.statuses.create') }}" class="btn btn-primary">
+                <a href="{{ route('statuses.create') }}" class="btn btn-primary">
                     <i class="fa fa-plus"></i> Add New Status
                 </a>
             </div>
@@ -22,9 +24,9 @@
             <div class="box-header with-border">
                 <h3 class="box-title">All Statuses</h3>
                 <div class="box-tools">
-                    <form action="{{ route('admin.statuses.index') }}" method="GET" class="form-inline">
+                    <form action="{{ route('statuses.index') }}" method="GET" class="form-inline">
                         <div class="input-group input-group-sm" style="width: 200px;">
-                            <input type="text" name="search" class="form-control" 
+                            <input type="text" name="search" class="form-control"
                                    placeholder="Search..." value="{{ request('search') }}">
                             <div class="input-group-btn">
                                 <button type="submit" class="btn btn-default">
@@ -35,11 +37,12 @@
                     </form>
                 </div>
             </div>
+
             <div class="box-body">
                 @if($statuses->isEmpty())
                     <div class="alert alert-info">
                         No statuses found. @if(auth()->user()->is_admin)Would you like to 
-                        <a href="{{ route('admin.statuses.create') }}">create one</a>?@endif
+                        <a href="{{ route('statuses.create') }}">create one</a>?@endif
                     </div>
                 @else
                     <table class="table table-bordered table-hover">
@@ -47,6 +50,7 @@
                             <tr>
                                 <th width="5%">ID</th>
                                 <th>Name</th>
+                                <th>Order</th>
                                 <th>Color</th>
                                 <th>Preview</th>
                                 @if(auth()->user()->is_admin)
@@ -59,19 +63,21 @@
                             <tr>
                                 <td>{{ $status->id }}</td>
                                 <td>{{ $status->name }}</td>
+                                <td>{{ $status->order }}</td>
                                 <td>{{ $status->color }}</td>
                                 <td>
-                                    <span class="badge" style="background-color: {{ $status->color }}">
+                                    <span class="badge rounded-pill" 
+                                          style="background-color: {{ $status->color }}; color: #fff;">
                                         {{ $status->name }}
                                     </span>
                                 </td>
                                 @if(auth()->user()->is_admin)
                                 <td class="text-center">
-                                    <a href="{{ route('admin.statuses.edit', $status->id) }}" 
+                                    <a href="{{ route('statuses.edit', $status->id) }}" 
                                        class="btn btn-sm btn-info" title="Edit">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('admin.statuses.destroy', $status->id) }}" 
+                                    <form action="{{ route('statuses.destroy', $status->id) }}" 
                                           method="POST" style="display:inline-block;">
                                         @csrf
                                         @method('DELETE')
@@ -88,6 +94,7 @@
                     </table>
                 @endif
             </div>
+
             <div class="box-footer clearfix">
                 <div class="float-right">
                     {{ $statuses->appends(request()->query())->links() }}

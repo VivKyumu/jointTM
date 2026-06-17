@@ -1,5 +1,7 @@
 @extends('layouts.partials')
 
+@section('title', 'Create Status')
+
 @section('content')
 <div class="content-wrapper">
     <section class="content-header">
@@ -8,7 +10,7 @@
                 <h1>Create New Status</h1>
             </div>
             <div class="col-md-6 text-right">
-                <a href="{{ route('admin.statuses.index') }}" class="btn btn-default">
+                <a href="{{ route('statuses.index') }}" class="btn btn-default">
                     <i class="fa fa-arrow-left"></i> Back to List
                 </a>
             </div>
@@ -20,7 +22,7 @@
             <div class="box-header with-border">
                 <h3 class="box-title">Status Details</h3>
             </div>
-            <form action="{{ route('admin.statuses.store') }}" method="POST">
+            <form action="{{ route('statuses.store') }}" method="POST">
                 @csrf
                 <div class="box-body">
                     <div class="form-group @error('name') has-error @enderror">

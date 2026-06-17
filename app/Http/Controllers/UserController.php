@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Group;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -22,34 +22,31 @@ class UserController extends Controller
 
     public function create()
     {
-        $groups = Group::all();
-        return view('admin.users.create', compact('groups'));
+        return view('admin.users.create');
     }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8',
-            'is_admin' => 'boolean',
-            'groups' => 'nullable|array',
-            'groups.*' => 'exists:groups,id'
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'role' => 'required|in:admin,manager,staff',
+        'password' => 'required|string|min:8|confirmed',
+    ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-            'is_admin' => $request->has('is_admin')
-        ]);
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'role' => $validated['role'],
+        'is_admin' => $validated['role'] === 'admin',
+        'is_active' => true,
+    ]);
+    ActivityLog::record('User Created', auth()->user()->name . " created user: {$user->name} ({$user->email}).");
 
-        if (isset($validated['groups'])) {
-            $user->groups()->sync($validated['groups']);
-        }
+    return redirect()->route('users.index')->with('success', 'User created successfully.');
+}
 
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully');
-    }
 
     public function show(User $user)
     {
@@ -65,32 +62,34 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'is_admin' => 'boolean',
-            'groups' => 'nullable|array',
-            'groups.*' => 'exists:groups,id'
-        ]);
+   public function update(Request $request, User $user)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,' . $user->id,
+        'is_admin' => 'nullable|boolean',
+    ]);
 
-        $user->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'is_admin' => $request->has('is_admin')
-        ]);
+    $oldName = $user->name;
+    $user->name = $validated['name'];
+    $user->email = $validated['email'];
+    $user->is_admin = $request->has('is_admin') ? 1 : 0;
+    $user->save();
+    ActivityLog::record('User Updated', auth()->user()->name . " updated user: {$oldName}.");
 
-        $user->groups()->sync($validated['groups'] ?? []);
+    return redirect()->route('users.index')->with('success', 'User updated successfully.');
 
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully');
-    }
+    if ($request->filled('password')) {
+    $user->password = bcrypt($request->password);
+}
+}
 
     public function destroy(User $user)
     {
+        ActivityLog::record('User Deleted', auth()->user()->name . " deleted user: {$user->name} ({$user->email}).");
         $user->groups()->detach();
         $user->delete();
-        return redirect()->route('admin.users.index')->with('success', 'User deactivated successfully');
+        return redirect()->route('users.index')->with('success', 'User deactivated successfully');
     }
 
     public function updateRole(Request $request, User $user)
@@ -136,4 +135,23 @@ class UserController extends Controller
             'message' => 'User groups synchronized successfully'
         ]);
     }
+    public function disable($id)
+{
+    $user = User::findOrFail($id);
+    $user->is_active = false;
+    $user->save();
+
+    return redirect()->route('users.index')->with('success', 'User has been disabled successfully.');
+}
+
+public function enable($id)
+{
+    $user = User::findOrFail($id);
+    $user->is_active = true;
+    $user->save();
+
+    return redirect()->route('users.index')->with('success', 'User has been re-enabled successfully.');
+}
+
+   
 }

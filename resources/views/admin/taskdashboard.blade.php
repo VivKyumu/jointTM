@@ -1,19 +1,21 @@
 @extends('layouts.partials')
 
+@section('title', 'Task Dashboard')
+
 @section('content')
 <div class="container">
     <h2 class="mb-2">
-        Hello Admin {{ Auth::user()->name }}, Welcome to your dashboard
+        Hello  {{ Auth::user()->name }}, Welcome to your dashboard
     </h2>
-    <p class="text-muted mb-4">Here's a quick overview of your task stats and users.</p>
+    <p class="text-muted mb-4">Here's a quick overview of your personal task stats.</p>
 
     <!-- Task Statistics -->
     <div class="row text-center mb-4">
         @php
             $stats = [
-                ['title' => 'Total Tasks', 'count' => $totalTasks, 'bg' => 'primary'],
-                ['title' => 'Completed Tasks', 'count' => $completedTasks, 'bg' => 'success'],
-                ['title' => 'Pending Tasks', 'count' => $pendingTasks, 'bg' => 'warning'],
+                ['title' => 'Your In Progress Tasks', 'count' => $userInProgressTasks, 'bg' => 'status-in-progress'],
+                ['title' => 'Your Completed Tasks', 'count' => $userCompletedTasks, 'bg' => 'status-completed'],
+                ['title' => 'Your Pending Tasks', 'count' => $userPendingTasks, 'bg' => 'status-pending'],
             ];
         @endphp
 
@@ -29,62 +31,9 @@
         @endforeach
     </div>
 
-    <!-- User List -->
-<div class="card mb-4">
-    <div class="card-header">Registered Users</div>
-    <div class="card-body">
-        <table class="table table-bordered table-sm">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Task Count</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($users as $user)
-                    <tr>
-                        <td>{{ $loop->iteration + ($users->currentPage() - 1) * $users->perPage() }}</td>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>{{ $user->tasks_count }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="text-center">No users found with more than 1 task.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-
-        @if ($users->hasPages())
-    <nav class="mt-3">
-        <ul class="pagination justify-content-center">
-            {{-- Previous Page --}}
-            <li class="page-item {{ $users->onFirstPage() ? 'disabled' : '' }}">
-                <a class="page-link" href="{{ $users->previousPageUrl() }}" rel="prev">«</a>
-            </li>
-
-            {{-- Page Links --}}
-            @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
-                <li class="page-item {{ $users->currentPage() == $page ? 'active' : '' }}">
-                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
-                </li>
-            @endforeach
-
-            {{-- Next Page --}}
-            <li class="page-item {{ !$users->hasMorePages() ? 'disabled' : '' }}">
-                <a class="page-link" href="{{ $users->nextPageUrl() }}" rel="next">»</a>
-            </li>
-        </ul>
-    </nav>
-@endif
-
-
     <!-- Quick Actions -->
-    <div class="d-flex gap-2">
-        <a href="{{ route('admin.tasks.index') }}" class="btn btn-outline-primary">View All Tasks</a>
+    <div class="d-flex gap-2 mb-4">
+        <a href="{{ route('tasks.index') }}" class="btn btn-outline-primary">View All My Tasks</a>
     </div>
 
     <!-- Chart Section -->
@@ -110,13 +59,15 @@
 </div>
 @endsection
 
+  
+
 @push('scripts')
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Line Chart
+    // Line Chart: Tasks Completed Over Time
     const ctxTask = document.getElementById('taskChart').getContext('2d');
     new Chart(ctxTask, {
         type: 'line',
@@ -126,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 label: 'Tasks Completed',
                 data: @json($taskCounts ?? []),
                 backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                borderColor: '#007bff',
+                borderColor: '#28a745',
                 borderWidth: 2,
                 fill: true,
                 tension: 0.3
@@ -144,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Doughnut Chart
+    // Doughnut Chart: Task Status Breakdown
     const ctxStatus = document.getElementById('statusChart').getContext('2d');
     new Chart(ctxStatus, {
         type: 'doughnut',
@@ -152,8 +103,8 @@ document.addEventListener('DOMContentLoaded', function () {
             labels: ['Pending', 'In Progress', 'Completed'],
             datasets: [{
                 data: @json($statusDistribution ?? [0, 0, 0]),
-                backgroundColor: ['#ffc107', '#17a2b8', '#28a745'],
-                borderColor: ['#ffc107', '#17a2b8', '#28a745'],
+                backgroundColor: ['#6c757d', '#ffc107', '#28a745'],
+                borderColor: ['#6c757d', '#ffc107', '#28a745'],
                 borderWidth: 1
             }]
         },

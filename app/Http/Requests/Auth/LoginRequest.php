@@ -29,6 +29,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'login_as' => ['required', 'in:user,admin'],
         ];
     }
 
@@ -46,6 +47,20 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        $user = Auth::user();
+        $requestedAdmin = $this->input('login_as') === 'admin';
+
+        if ((bool) $user->is_admin !== $requestedAdmin) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'login_as' => $requestedAdmin
+                    ? 'This account does not have admin access.'
+                    : 'Please use the admin login option for this account.',
             ]);
         }
 

@@ -16,8 +16,10 @@ return new class extends Migration
             $table->string('name');               // Name of complexity level (e.g., "Simple", "Complex")
             $table->integer('level')->unique();   // Numeric level (1-5) with unique constraint
             $table->string('color')->nullable();  // Color code for visual representation
-            $table->timestamps();                 // Created_at and updated_at timestamps
-        });
+            $table->timestamps(); 
+           
+    });                // Created_at and updated_at timestamps
+    
     }
 
     /**

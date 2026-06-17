@@ -1,6 +1,25 @@
 @extends('layouts.partials')
 
+@section('title', 'All Tasks')
+
 @section('content')
+@php
+    $statusClass = fn ($status) => match (strtolower($status ?? '')) {
+        'completed' => 'status-completed',
+        'in progress' => 'status-in-progress',
+        'on hold' => 'status-on-hold',
+        'pending' => 'status-pending',
+        default => 'status-pending',
+    };
+    $complexityClass = fn ($complexity) => match (strtolower($complexity ?? '')) {
+        'very simple' => 'complexity-very-simple',
+        'simple' => 'complexity-simple',
+        'medium' => 'complexity-medium',
+        'complex' => 'complexity-complex',
+        'very complex' => 'complexity-very-complex',
+        default => 'status-pending',
+    };
+@endphp
 <div class="container mt-4">
     <h2 class="text-dark">
         <i class="fas fa-tasks text-primary me-2"></i> All Tasks
@@ -25,13 +44,17 @@
     @endif
 
     <table class="table table-striped table-hover rounded shadow-sm bg-white align-middle">
-        <thead class="thead-light">
+        <thead class="bg-secondary text-white">
             <tr>
                 <th><i class="fas fa-heading"></i> Title</th>
                 <th><i class="fas fa-align-left"></i> Description</th>
                 <th><i class="fas fa-id-badge"></i> User ID</th>
                 <th><i class="fas fa-user"></i> User Name</th>
                 <th><i class="fas fa-user-tag"></i> Role</th>
+                <th><i class="fas fa-flag"></i> Status</th>
+                <th><i class="fas fa-layer-group"></i> Complexity</th>
+                <th><i class="fas fa-calendar"></i> Created</th>
+                <th><i class="fas fa-history"></i> Updated</th>
                 <th><i class="fas fa-cogs"></i> Actions</th>
             </tr>
         </thead>
@@ -45,11 +68,22 @@
                     <td>{{ $task->user->name ?? 'N/A' }}</td>
 
                     <td>
-                        <span class="badge {{ $task->user->isAdmin() ? 'bg-primary' : 'bg-secondary' }}">
-                            <i class="fas {{ $task->user->isAdmin() ? 'fa-shield-alt' : 'fa-user' }} me-1"></i>
-                            {{ $task->user->isAdmin() ? 'Admin' : 'User' }}
+    <span class="badge bg-secondary">
+        <i class="fas {{ $task->user->isAdmin() ? 'fa-shield-alt' : 'fa-user' }} me-1"></i>
+        {{ $task->user->isAdmin() ? 'Admin' : 'User' }}
+    </span>
+</td>
+                    <td>
+                        <span class="badge badge-{{ $statusClass($task->status_name) }}">{{ ucfirst($task->status_name) }}</span>
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ $complexityClass($task->complexity_name) }}">
+                            {{ $task->complexity_name }}
                         </span>
                     </td>
+                    <td>{{ optional($task->created_at)->format('M d, Y') }}</td>
+                    <td>{{ optional($task->updated_at)->format('M d, Y') }}</td>
+
 
                     <td>
                         <div class="btn-group btn-group-sm" role="group">
@@ -71,7 +105,12 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center text-muted">No tasks found.</td>
+                    <td colspan="10">
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p class="mb-0">No tasks found.</p>
+                        </div>
+                    </td>
                 </tr>
             @endforelse
         </tbody>

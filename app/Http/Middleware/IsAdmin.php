@@ -16,7 +16,11 @@ class IsAdmin
      */
    public function handle(Request $request, Closure $next): Response
 {
-    if (Auth::check() && Auth::user()->is_admin) {
+    if (Auth::check() && Auth::user()->isAdmin()) {
+        return $next($request);
+    }
+
+    if (Auth::check() && Auth::user()->isManager() && $request->is('admin/tasks*', 'admin/task-dashboard', 'admin/analytics*')) {
         return $next($request);
     }
 

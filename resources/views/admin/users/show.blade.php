@@ -1,4 +1,5 @@
 @extends('layouts.partials')
+@section('title', 'User Details')
 @section('content')
 <div class="content-wrapper">
     <section class="content-header">
@@ -14,6 +15,12 @@
         </div>
     </section>
     <section class="content">
+        @if(session('success'))
+    <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        {{ session('success') }}
+    </div>
+@endif
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">User Information</h3>
