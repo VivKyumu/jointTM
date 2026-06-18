@@ -25,9 +25,11 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 COPY package.json package-lock.json ./
-RUN npm ci && npm run build
+RUN npm ci
 
 COPY . .
+
+RUN npm run build
 
 RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
